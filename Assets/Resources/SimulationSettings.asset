@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8acb433732bead24b9f795ff0fbadc07, type: 3}
+  m_Name: SimulationSettings
+  m_EditorClassIdentifier: 
+  UnitsPerFormation: 1024
+  FormationWidth: 64
+  IfBurstIsNotSupportedSpawnFormationsDividedBy: 5
+  MinionSpeed: 2
+  BlastRadius: 10
+  ArcherHitTime: 1.7
+  FormationAudioSource: {fileID: 0}
+  FormationClips: []
+  EnableSpawners: 1
+  SpawnTimesPerUnit:
+  - 0.1
+  - 0.5
+  - 0.75
+  FormationUpdateFrequency: 20
+  ArcherAttackTime: 7
+  TimeToSpawnBatch: 3
+  MinionScaleMin: 0.8
+  MinionScaleMax: 1.2
+  MinionAnimationSpeedMin: 0.8
+  MinionAnimationSpeedMax: 1.2
+  MinionHeightOffsetMin: 0.1
+  MinionHeightOffsetMax: 0.3
+  DisableRendering: 0

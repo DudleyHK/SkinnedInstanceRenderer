@@ -49,7 +49,7 @@ public class SpawnerSystem : JobComponentSystem
 			SpawnPoints[i] = spawnPointData;
 		}
 
-		spawnerObject.SpawningFinished = true;
+		//spawnerObject.SpawningFinished = true;
 	}
 
 	public void InitialSpawning()
@@ -140,18 +140,6 @@ public class SpawnerSystem : JobComponentSystem
 
 					EntityManager.SetComponentData(entity, forData);
 					point.formationEntity = entity;
-
-					//var path = EntityManager.GetComponentData<FormationHighLevelPath>(entity);
-					//int pathIndex = point.minPathIndex + (point.SpawnedFormationCount % (point.maxPathIndex + 1 - point.minPathIndex));
-                    //
-					//List<float3> pathList = newHighLevelRoutes[pathIndex];
-                    //
-					//path.target0 = point.IsFriendly ? pathList[3] : pathList[0];
-					//path.target1 = point.IsFriendly ? pathList[2] : pathList[1];
-					//path.target2 = point.IsFriendly ? pathList[1] : pathList[2];
-					//path.ultimateDestination = point.IsFriendly ? pathList[0] : pathList[3];
-                    //
-					//EntityManager.SetComponentData(entity, path);
 
 					point.SpawnedFormationCount++;
 				}

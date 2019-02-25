@@ -100,13 +100,13 @@ public struct MinionBehaviourJob : IJobParallelForBatch
 			else
 			{
 				if (animation.CurrentAnimationId != AnimationName.Attack1 && animation.CurrentAnimationId != AnimationName.Attack2)
-					animation.NewAnimationId = Randomizer.next(0, ref seed) == 0 ? AnimationName.Attack1 : AnimationName.Attack2;
+					//animation.NewAnimationId = Randomizer.next(0, ref seed) == 0 ? AnimationName.Attack1 : AnimationName.Attack2;
 
-				float3 relative = minionAttackData[index].attackPosition - transform.Position;
-				relative.y = 0;
-				if (math.any(relative))
+				//float3 relative = minionAttackData[index].attackPosition - transform.Position;
+				//relative.y = 0;
+				//if (math.any(relative))
 				{
-					newTransformForward = Vector3.RotateTowards(transform.Forward, math.normalize(relative), Mathf.PI * dt, 10);
+			//		newTransformForward = Vector3.RotateTowards(transform.Forward, math.normalize(relative), Mathf.PI * dt, 10);
 				}
 				if (2 != animation.UnitType)
 				{

@@ -40,7 +40,7 @@ public class SimulationSettings : ScriptableObject
 		}
 	}
 
-	public int UnitsPerFormation = 1024;
+	public int UnitsPerFormation = 5;
 	public int FormationWidth = 64;
 	public int IfBurstIsNotSupportedSpawnFormationsDividedBy = 5;
 
@@ -54,7 +54,6 @@ public class SimulationSettings : ScriptableObject
 	public bool EnableSpawners = false;
 	public System.Collections.Generic.List<float> SpawnTimesPerUnit;
 
-	//public bool AutoMoveFormaiton;
 	public int FormationUpdateFrequency = 20;
 
 	public float ArcherAttackTime = 7;
@@ -71,8 +70,4 @@ public class SimulationSettings : ScriptableObject
 	public float MinionHeightOffsetMax = 0.3f;
 
 	public bool DisableRendering = false;
-
-	// I had to decouple spell settings data from prefab
-	// This is used as dictionary where spell type is key
-	// public List<SpellSystem.SpellSettings> SpellSettings;
 }

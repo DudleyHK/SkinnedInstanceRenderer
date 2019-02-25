@@ -61,10 +61,10 @@ public struct ArcherJob : IJobParallelFor
 		archer.attackCycle = archerAttackCycle;
 
 		long archerAttackVarianceSeed = index;
-		float attackTimeVariance = Randomizer.Float(-0.15f, 0.15f, ref archerAttackVarianceSeed);
-		float varianceHitTime = archerHitTime + attackTimeVariance;
+		//float attackTimeVariance = Randomizer.Float(-0.15f, 0.15f, ref archerAttackVarianceSeed);
+		//float varianceHitTime = archerHitTime + attackTimeVariance;
 		// Check Attack cycles
-		if (archerAttackCycle >= varianceHitTime && prevArcherAttackCycle < varianceHitTime)
+		//if (archerAttackCycle >= varianceHitTime && prevArcherAttackCycle < varianceHitTime)
 		{
 			readyToAttack = true;
 		}
@@ -77,7 +77,7 @@ public struct ArcherJob : IJobParallelFor
 			formationSideVector.x = -formationSideVector.x;
 
 			float3 targetPosition = closestFormation.Position + closestFormation.formationSide * formationSideVector * closestFormation.Width;
-			targetPosition += new float3(Randomizer.Float(-20, 20, ref seed), 0, Randomizer.Float(-20, 20, ref seed));
+			//targetPosition += new float3(Randomizer.Float(-20, 20, ref seed), 0, Randomizer.Float(-20, 20, ref seed));
 
 			float3 relativeVector = targetPosition - t.Position;
 			float distance = math.length(relativeVector.xz);
@@ -90,7 +90,7 @@ public struct ArcherJob : IJobParallelFor
 
 			float angle = Mathf.PI * math.lerp(0.36f, 0.2f, math.saturate(distance / RangedUnitData.ArcherAttackRange));
 			float variant = Mathf.PI * 0.05f;
-			angle = Randomizer.Float(angle - variant, angle + variant, ref seed);
+			//angle = Randomizer.Float(angle - variant, angle + variant, ref seed);
 
 			float velocity = GetArrowVelocity(distance, angle, arrowStartingPosition.y - closestFormation.Position.y);
 

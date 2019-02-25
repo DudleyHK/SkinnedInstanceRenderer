@@ -135,118 +135,6 @@ public class TextureAnimatorSystem : JobComponentSystem
         }
     }
 
-#if !USE_SAFE_JOBS
-	[ComputeJobOptimization]
-	struct CullAndComputeParameters : IJobParallelFor
-	{
-		[ReadOnly]
-		public ComponentDataArray<TextureAnimatorData> textureAnimatorData;
-
-		[ReadOnly]
-		public ComponentDataArray<UnitTransformData> unitTransformData;
-
-		[NativeFixedLength(100)]
-		[ReadOnly]
-		public NativeArray<AnimationClipDataBaked> animationClips;
-
-		[ReadOnly]
-		public float dt;
-
-		[ReadOnly]
-		public float DistanceMaxLod0;
-
-		[ReadOnly]
-		public float DistanceMaxLod1;
-
-		[ReadOnly]
-		public float DistanceMaxLod2;
-
-		[ReadOnly]
-		public float3 CameraPosition;
-
-		[ReadOnly]
-		public IntHolder BufferCounterLod0;
-
-		[ReadOnly]
-		public IntHolder BufferCounterLod1;
-
-		[ReadOnly]
-		public IntHolder BufferCounterLod2;
-
-		[ReadOnly]
-		public IntHolder BufferCounterLod3;
-
-		[ReadOnly]
-		public NativeArray<IntPtr> BufferPointers;
-
-		public void Execute(int i)
-		{
-			var unitTransform = unitTransformData[i];
-			float distance = math.length(CameraPosition - unitTransform.Position);
-
-			var animatorData = textureAnimatorData[i];
-
-			AnimationClipDataBaked clip = animationClips[(int)animatorData.UnitType * 25 + animatorData.CurrentAnimationId];
-			Quaternion rotation = Quaternion.LookRotation(unitTransform.Forward, new Vector3(0.0f, 1.0f, 0.0f));
-			float texturePosition = textureAnimatorData[i].AnimationNormalizedTime * clip.TextureRange + clip.TextureOffset;
-			float4 position = new float4(unitTransform.Position, unitTransform.Scale);
-
-			if (distance < DistanceMaxLod0)
-			{
-				int writeIndex = BufferCounterLod0.Increment();
-
-				//unitPositions[writeIndex] = unitTransform.Position;
-				UnsafeUtility.WriteArrayElement(BufferPointers[0], writeIndex, position);
-
-				//unitRotations[writeIndex] = Quaternion.LookRotation(unitTransform.Forward, new Vector3(0.0f, 1.0f, 0.0f) /* Vector3.up */);
-				UnsafeUtility.WriteArrayElement(BufferPointers[1], writeIndex, rotation);
-
-				//textureCoordinates[writeIndex] = animationData[i].AnimationNormalizedTime * clip.TextureRange + clip.TextureOffset;
-				UnsafeUtility.WriteArrayElement(BufferPointers[2], writeIndex, texturePosition);
-			}
-			else if (distance < DistanceMaxLod1)
-			{
-				int writeIndex = BufferCounterLod1.Increment();
-
-				//unitPositions[writeIndex] = unitTransform.Position;
-				UnsafeUtility.WriteArrayElement(BufferPointers[3], writeIndex, position);
-
-				//unitRotations[writeIndex] = Quaternion.LookRotation(unitTransform.Forward, new Vector3(0.0f, 1.0f, 0.0f) /* Vector3.up */);
-				UnsafeUtility.WriteArrayElement(BufferPointers[4], writeIndex, rotation);
-
-				//textureCoordinates[writeIndex] = animationData[i].AnimationNormalizedTime * clip.TextureRange + clip.TextureOffset;
-				UnsafeUtility.WriteArrayElement(BufferPointers[5], writeIndex, texturePosition);
-			}
-			else if (distance < DistanceMaxLod2)
-			{
-				int writeIndex = BufferCounterLod2.Increment();
-
-				//unitPositions[writeIndex] = unitTransform.Position;
-				UnsafeUtility.WriteArrayElement(BufferPointers[6], writeIndex, position);
-
-				//unitRotations[writeIndex] = Quaternion.LookRotation(unitTransform.Forward, new Vector3(0.0f, 1.0f, 0.0f) /* Vector3.up */);
-				UnsafeUtility.WriteArrayElement(BufferPointers[7], writeIndex, rotation);
-
-				//textureCoordinates[writeIndex] = animationData[i].AnimationNormalizedTime * clip.TextureRange + clip.TextureOffset;
-				UnsafeUtility.WriteArrayElement(BufferPointers[8], writeIndex, texturePosition);
-			}
-			else
-			{
-				int writeIndex = BufferCounterLod3.Increment();
-
-				//unitPositions[writeIndex] = unitTransform.Position;
-				UnsafeUtility.WriteArrayElement(BufferPointers[9], writeIndex, position);
-
-				//unitRotations[writeIndex] = Quaternion.LookRotation(unitTransform.Forward, new Vector3(0.0f, 1.0f, 0.0f) /* Vector3.up */);
-				UnsafeUtility.WriteArrayElement(BufferPointers[10], writeIndex, rotation);
-
-				//textureCoordinates[writeIndex] = animationData[i].AnimationNormalizedTime * clip.TextureRange + clip.TextureOffset;
-				UnsafeUtility.WriteArrayElement(BufferPointers[11], writeIndex, texturePosition);
-			}
-		}
-	}
-#endif
-
 #if USE_SAFE_JOBS
     [BurstCompile]
     struct CullAndComputeParametersSafe : IJob
@@ -396,22 +284,6 @@ public class TextureAnimatorSystem : JobComponentSystem
         dataPerUnitType.Lod2Drawer = new InstancedSkinningDrawer(dataPerUnitType, dataPerUnitType.BakedData.lods.Lod2Mesh);
         dataPerUnitType.Lod3Drawer = new InstancedSkinningDrawer(dataPerUnitType, dataPerUnitType.BakedData.lods.Lod3Mesh);
 
-#if !USE_SAFE_JOBS
-		dataPerUnitType.BufferPointers = new NativeArray<IntPtr>(12, Allocator.Persistent);
-		dataPerUnitType.BufferPointers[0] = dataPerUnitType.Drawer.BufferPointers[0];
-		dataPerUnitType.BufferPointers[1] = dataPerUnitType.Drawer.BufferPointers[1];
-		dataPerUnitType.BufferPointers[2] = dataPerUnitType.Drawer.BufferPointers[2];
-		dataPerUnitType.BufferPointers[3] = dataPerUnitType.Lod1Drawer.BufferPointers[0];
-		dataPerUnitType.BufferPointers[4] = dataPerUnitType.Lod1Drawer.BufferPointers[1];
-		dataPerUnitType.BufferPointers[5] = dataPerUnitType.Lod1Drawer.BufferPointers[2];
-		dataPerUnitType.BufferPointers[6] = dataPerUnitType.Lod2Drawer.BufferPointers[0];
-		dataPerUnitType.BufferPointers[7] = dataPerUnitType.Lod2Drawer.BufferPointers[1];
-		dataPerUnitType.BufferPointers[8] = dataPerUnitType.Lod2Drawer.BufferPointers[2];
-		dataPerUnitType.BufferPointers[9] = dataPerUnitType.Lod3Drawer.BufferPointers[0];
-		dataPerUnitType.BufferPointers[10] = dataPerUnitType.Lod3Drawer.BufferPointers[1];
-		dataPerUnitType.BufferPointers[11] = dataPerUnitType.Lod3Drawer.BufferPointers[2];
-#endif
-
         perUnitTypeDataHolder.Add(type, dataPerUnitType);
         TransferAnimationData(type);
         GameObject.Destroy(bakingObject);
@@ -438,7 +310,7 @@ public class TextureAnimatorSystem : JobComponentSystem
             animationClips.Add(state.clip);
         }
 
-        animationClips.Sort((x, y) => String.Compare(x.name, y.name, StringComparison.Ordinal));
+        animationClips.Sort((x, y) => string.Compare(x.name, y.name, StringComparison.Ordinal));
 
         return animationClips.ToArray();
     }
@@ -557,48 +429,15 @@ public class TextureAnimatorSystem : JobComponentSystem
         return inputDeps;
     }
 
-    private void ComputeFences(ComponentDataArray<TextureAnimatorData> textureAnimatorDataForUnitType, float dt, ComponentDataArray<UnitTransformData> unitTransformDataForUnitType, KeyValuePair<UnitType, DataPerUnitType> data, JobHandle previousFence, NativeArray<JobHandle> jobHandles, int i)
+    private void ComputeFences(ComponentDataArray<TextureAnimatorData> textureAnimatorDataForUnitType, float dt,
+        ComponentDataArray<UnitTransformData> unitTransformDataForUnitType,
+        KeyValuePair<UnitType, DataPerUnitType> data, JobHandle previousFence, NativeArray<JobHandle> jobHandles, int i)
     {
         Profiler.BeginSample("Scheduling");
         // TODO: Replace this with more efficient search.
         Profiler.BeginSample("Create filtering jobs");
         var cameraPosition = Camera.main.transform.position;
 
-#if !USE_SAFE_JOBS
-		data.Value.Drawer.BufferCounter.Reset();
-		data.Value.Lod1Drawer.BufferCounter.Reset();
-		data.Value.Lod2Drawer.BufferCounter.Reset();
-		data.Value.Lod3Drawer.BufferCounter.Reset();
-		
-		var cullAndComputeJob = new CullAndComputeParameters()
-		{
-			unitTransformData = unitTransformDataForUnitType,
-			textureAnimatorData = textureAnimatorDataForUnitType,
-			animationClips = animationClipData,
-			dt = dt,
-			CameraPosition = cameraPosition,
-			DistanceMaxLod0 = data.Value.BakedData.lods.Lod1Distance,
-			DistanceMaxLod1 = data.Value.BakedData.lods.Lod2Distance,
-			DistanceMaxLod2 = data.Value.BakedData.lods.Lod3Distance,
-			BufferCounterLod0 = data.Value.Drawer.BufferCounter,
-			BufferCounterLod1 = data.Value.Lod1Drawer.BufferCounter,
-			BufferCounterLod2 = data.Value.Lod2Drawer.BufferCounter,
-			BufferCounterLod3 = data.Value.Lod3Drawer.BufferCounter,
-			BufferPointers = data.Value.BufferPointers
-		};
-
-		Profiler.EndSample();
-
-		Profiler.BeginSample("Schedule compute jobs");
-		var computeShaderJobFence0 = cullAndComputeJob.Schedule(unitTransformDataForUnitType.Length, SimulationState.HumongousBatchSize, previousFence);
-		Profiler.EndSample();
-
-		Profiler.BeginSample("Create combined dependency");
-		jobHandles[i] = computeShaderJobFence0;
-		Profiler.EndSample();
-
-		Profiler.EndSample();
-#else
         data.Value.Drawer.ObjectPositions.Clear();
         data.Value.Lod1Drawer.ObjectPositions.Clear();
         data.Value.Lod2Drawer.ObjectPositions.Clear();
@@ -649,128 +488,26 @@ public class TextureAnimatorSystem : JobComponentSystem
         Profiler.EndSample();
 
         Profiler.EndSample();
-#endif
     }
 }
 
-#if !USE_SAFE_JOBS
-[NativeContainer]
-public struct IntHolder
-{
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
-	public AtomicSafetyHandle m_Safety;
-	public DisposeSentinel m_DisposeSentinel;
-#endif
-
-	[NativeContainer]
-	public struct HolderData
-	{
-		public IntPtr InnerData;
-	}
-
-	[NativeContainer]
-	public struct InnerData
-	{
-		public int Integer;
-	}
-
-	public IntPtr Data;
-
-	public bool IsCreated { get { return Data != IntPtr.Zero; } }
-
-	private Allocator allocator;
-
-	public unsafe IntHolder(Allocator allocator)
-	{
-		this.allocator = allocator;
-		Data = UnsafeUtility.Malloc(sizeof(HolderData), 4, this.allocator);
-		((HolderData*)Data)->InnerData = UnsafeUtility.Malloc((ulong)sizeof(InnerData), 4, this.allocator);
-		((InnerData*)((HolderData*)Data)->InnerData)->Integer = -1;
-
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
-		DisposeSentinel.Create(Data, this.allocator, out m_Safety, out m_DisposeSentinel, 0, Deallocate);
-#endif
-	}
-
-	public unsafe void Dispose()
-	{
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
-		DisposeSentinel.Dispose(m_Safety, ref m_DisposeSentinel);
-#endif
-
-		Deallocate(Data, allocator);
-		Data = IntPtr.Zero;
-	}
-
-	private static unsafe void Deallocate(IntPtr data, Allocator alloc)
-	{
-		HolderData* holderData = (HolderData*)data;
-
-		UnsafeUtility.Free(holderData->InnerData, alloc);
-		holderData->InnerData = IntPtr.Zero;
-		UnsafeUtility.Free(data, alloc);
-	}
-
-	public unsafe int Increment()
-	{
-		HolderData* holderData = (HolderData*)Data;
-		InnerData* data = (InnerData*)holderData->InnerData;
-
-		int current,
-			next;
-		do
-		{
-			current = data->Integer;
-			next = current + 1;
-		} while (Interlocked.CompareExchange(ref data->Integer, next, current) != current);
-
-		return next;
-	}
-
-	public unsafe int Get()
-	{
-		HolderData* holderData = (HolderData*)Data;
-		InnerData* data = (InnerData*)holderData->InnerData;
-
-		return Interlocked.Exchange(ref data->Integer, data->Integer);
-	}
-
-	public unsafe void Reset()
-	{
-		HolderData* holderData = (HolderData*)Data;
-		InnerData* data = (InnerData*)holderData->InnerData;
-
-		Interlocked.Exchange(ref data->Integer, -1);
-	}
-}
-#endif
-
 public class InstancedSkinningDrawer : IDisposable
 {
+    public int UnitToDrawCount => ObjectPositions.Length;
+
     private const int PreallocatedBufferSize = 32 * 1024;
 
     private ComputeBuffer argsBuffer;
 
-    private readonly uint[] indirectArgs = new uint[5] { 0, 0, 0, 0, 0 };
+    private readonly uint[] indirectArgs = { 0, 0, 0, 0, 0 };
 
     private ComputeBuffer textureCoordinatesBuffer;
     private ComputeBuffer objectRotationsBuffer;
     private ComputeBuffer objectPositionsBuffer;
 
-#if !USE_SAFE_JOBS
-	public NativeArray<float> TextureCoordinates;
-	public NativeArray<float4> ObjectPositions;
-	public NativeArray<quaternion> ObjectRotations;
-
-	public NativeArray<IntPtr> BufferPointers;
-	public IntHolder BufferCounter;
-
-#else
     public NativeList<float3> TextureCoordinates;
     public NativeList<float4> ObjectPositions;
     public NativeList<quaternion> ObjectRotations;
-#endif
-
 
 
     private Material material;
@@ -780,7 +517,9 @@ public class InstancedSkinningDrawer : IDisposable
     private TextureAnimatorSystem.DataPerUnitType data;
 
 
-    public unsafe InstancedSkinningDrawer(TextureAnimatorSystem.DataPerUnitType data, Mesh meshToDraw)
+
+
+    public InstancedSkinningDrawer(TextureAnimatorSystem.DataPerUnitType data, Mesh meshToDraw)
     {
         this.data = data;
         this.mesh = meshToDraw;
@@ -795,24 +534,9 @@ public class InstancedSkinningDrawer : IDisposable
         objectPositionsBuffer = new ComputeBuffer(PreallocatedBufferSize, 16);
         textureCoordinatesBuffer = new ComputeBuffer(PreallocatedBufferSize, 12);
 
-#if !USE_SAFE_JOBS
-		TextureCoordinates = new NativeArray<float3>(PreallocatedBufferSize, Allocator.Persistent);
-		ObjectPositions = new NativeArray<float4>(PreallocatedBufferSize, Allocator.Persistent);
-		ObjectRotations = new NativeArray<float4>(PreallocatedBufferSize, Allocator.Persistent);
-#else
         TextureCoordinates = new NativeList<float3>(PreallocatedBufferSize, Allocator.Persistent);
         ObjectPositions = new NativeList<float4>(PreallocatedBufferSize, Allocator.Persistent);
         ObjectRotations = new NativeList<quaternion>(PreallocatedBufferSize, Allocator.Persistent);
-#endif
-
-#if !USE_SAFE_JOBS
-		BufferPointers = new NativeArray<IntPtr>(3, Allocator.Persistent);
-
-		BufferPointers[0] = ObjectPositions.GetUnsafeBufferPointerWithoutChecks();
-		BufferPointers[1] = ObjectRotations.GetUnsafeBufferPointerWithoutChecks();
-		BufferPointers[2] = TextureCoordinates.GetUnsafeBufferPointerWithoutChecks();
-		BufferCounter = new IntHolder(Allocator.Persistent);
-#endif
 
         material.SetBuffer("textureCoordinatesBuffer", textureCoordinatesBuffer);
         material.SetBuffer("objectPositionsBuffer", objectPositionsBuffer);
@@ -837,11 +561,6 @@ public class InstancedSkinningDrawer : IDisposable
         textureCoordinatesBuffer?.Dispose();
         if(TextureCoordinates.IsCreated)
             TextureCoordinates.Dispose();
-
-#if !USE_SAFE_JOBS
-		if (BufferCounter.IsCreated) BufferCounter.Dispose();
-		if (BufferPointers.IsCreated) BufferPointers.Dispose();
-#endif
     }
 
     public void Draw()
@@ -857,15 +576,10 @@ public class InstancedSkinningDrawer : IDisposable
 
         Profiler.BeginSample("Shader set data");
 
-#if !USE_SAFE_JOBS
-		objectPositionsBuffer.SetData(ObjectPositions, 0, 0, count);
-		objectRotationsBuffer.SetData(ObjectRotations, 0, 0, count);
-		textureCoordinatesBuffer.SetData(TextureCoordinates, 0, 0, count);
-#else
+
         objectPositionsBuffer.SetData((NativeArray<float4>)ObjectPositions, 0, 0, count);
         objectRotationsBuffer.SetData((NativeArray<quaternion>)ObjectRotations, 0, 0, count);
         textureCoordinatesBuffer.SetData((NativeArray<float3>)TextureCoordinates, 0, 0, count);
-#endif
 
         material.SetBuffer("textureCoordinatesBuffer", textureCoordinatesBuffer);
         material.SetBuffer("objectPositionsBuffer", objectPositionsBuffer);
@@ -888,15 +602,5 @@ public class InstancedSkinningDrawer : IDisposable
         Graphics.DrawMeshInstancedIndirect(mesh, 0, material, new Bounds(Vector3.zero, 1000000 * Vector3.one), argsBuffer, 0, new MaterialPropertyBlock(), ShadowCastingMode.Off, true);
     }
 
-    public int UnitToDrawCount
-    {
-        get
-        {
-#if !USE_SAFE_JOBS
-				return BufferCounter.Get() + 1;
-#else
-            return ObjectPositions.Length;
-#endif
-        }
-    }
+
 }

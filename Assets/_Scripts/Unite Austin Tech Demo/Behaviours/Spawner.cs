@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using Unity.Entities;
 using UnityEngine.Experimental.AI;
+using Random = UnityEngine.Random;
 
 public class Spawner : MonoBehaviour
 {
@@ -44,8 +45,6 @@ public class Spawner : MonoBehaviour
 			formationData.Position.y = hit.point.y;
 		}
 		if (!spawnedFromPortals) formationData.SpawnedCount = formationData.UnitCount;
-		var location = mapLocationQuery.MapLocation(formationData.Position, new Vector3(100, 100, 100), 0);
-		formationData.Position = location.position;
 
 		if (forward == null)
 		{
@@ -57,36 +56,12 @@ public class Spawner : MonoBehaviour
 		}
 
 		formationData.HighLevelPathIndex = 1;
-
-		//FormationWaypoint bridgeStart = GetClosestWaypoint(waypoints, formationData.Position, !formationData.IsFriendly);
-		//FormationWaypoint bridgeEnd = Array.Find(waypoints, x => x.index == bridgeStart.index && x.isLeft != bridgeStart.isLeft);
-        //
-		//FormationHighLevelPath highLevelPath = new FormationHighLevelPath
-		//{
-		//	target1 = bridgeStart.transform.position,
-		//	target2 = bridgeEnd.transform.position,
-		//	ultimateDestination = new float3(formationData.Position.x, formationData.Position.y, -Mathf.Sign(formationData.Position.z) * 200)
-		//};
-
 		entityManager.AddComponentData(formationEntity, formationData);
-		entityManager.AddComponentData(formationEntity, new FormationClosestData() { });
+		entityManager.AddComponentData(formationEntity, new FormationClosestData());
 		entityManager.AddComponentData(formationEntity, new FormationNavigationData { TargetPosition = formationData.Position });
-
-		//entityManager.AddComponentData(formationEntity, new CrowdAgent { worldPosition = formationData.Position, type = 0, location = location});
-		// entityManager.AddComponentData(formationEntity, highLevelPath);
         entityManager.AddComponent(formationEntity, typeof(EntityBuffer));
         entityManager.AddComponent(formationEntity, typeof(PolygonIdBuffer));
-        entityManager.AddComponentData(formationEntity, new FormationIntegrityData() { });
-
-		//var crowd = new CrowdAgentNavigator()
-		//{
-		//	active = true,
-		//	newDestinationRequested = false,
-		//	goToDestination = false,
-		//	destinationInView = false,
-		//	destinationReached = true,
-		//};
-		//entityManager.AddComponentData(formationEntity, crowd);
+        entityManager.AddComponentData(formationEntity, new FormationIntegrityData());
 
 		var unitType = (UnitType)formationData.UnitType;
 
@@ -119,25 +94,10 @@ public class Spawner : MonoBehaviour
 			transform.UnitType = (int)unitType;
 			transform.Forward = formationData.Forward;
 
-			float scale = entityManager.GetSharedComponentData<RenderingData>(entity).LodData.Scale;
-			transform.Scale = UnityEngine.Random.Range(SimulationSettings.Instance.MinionScaleMin, SimulationSettings.Instance.MinionScaleMax) * scale;
-			if (unitType != UnitType.Skeleton)
-			{
-				transform.HeightOffset = UnityEngine.Random.Range(SimulationSettings.Instance.MinionHeightOffsetMin,
-																SimulationSettings.Instance.MinionHeightOffsetMax);
-			}
 
-			if (!spawnedFromPortals)
-			{
-				transform.Position = formationData.GetOffsetFromCenter(i) + formationData.Position;
-			}
-			else
-			{
-				float3 unitOffset = new float3((i % SimulationSettings.countPerSpawner), 0f, 0);
-				transform.Position = formationData.Position + unitOffset + spawnPointOffset;
-			}
-
-			entityManager.SetComponentData(entity, new NavMeshLocationComponent(mapLocationQuery.MapLocation(transform.Position, Vector3.one * 10, 0)));
+            var randf3 = Random.insideUnitSphere * 100f;
+            transform.Position = randf3;
+            transform.Position.y = 0f;
 
 			animator.UnitType = (int)unitType;
 			animator.AnimationSpeedVariation = UnityEngine.Random.Range(SimulationSettings.Instance.MinionAnimationSpeedMin,
@@ -174,10 +134,10 @@ public class Spawner : MonoBehaviour
 			case UnitType.Melee:
 				minionPrefab = ViewSettings.Instance.MeleePrefab;
 				break;
-			case UnitType.Skeleton:
-				minionPrefab = ViewSettings.Instance.SkeletonPrefab;
-				break;
-			default:
+            case UnitType.Skeleton:
+                minionPrefab = ViewSettings.Instance.SkeletonPrefab;
+                break;
+            default:
 				throw new ArgumentOutOfRangeException("unitType", unitType, null);
 		}
 		return minionPrefab;
@@ -187,22 +147,5 @@ public class Spawner : MonoBehaviour
 	{
 		var entity = entityManager.CreateEntity(typeof(ArrowData));
 		entityManager.SetComponentData(entity, arrowData);
-	}
-
-	private FormationWaypoint GetClosestWaypoint(FormationWaypoint[] waypoints, float3 position, bool isLeft)
-	{
-		FormationWaypoint result = null;
-
-		foreach (var w in waypoints)
-		{
-			if (w.isLeft != isLeft) continue;
-
-			if (result == null || math.abs(w.transform.position.x - position.x) < math.abs(result.transform.position.x - position.x ))
-			{
-				result = w;
-			}
-		}
-
-		return result;
 	}
 }

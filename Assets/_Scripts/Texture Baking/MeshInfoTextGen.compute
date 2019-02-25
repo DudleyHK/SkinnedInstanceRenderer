@@ -1,0 +1,30 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+struct MeshInfo
+{
+	float position;
+	float normal;
+};
+
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> OutPosition;
+RWTexture2D<float4> OutNormal;
+
+StructuredBuffer<MeshInfo> meshInfo;
+
+int vertCount;
+
+
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+	int index = id.y * vertCount + id.x;
+	MeshInfo info = meshInfo[index];
+
+	OutPosition[id.xy] = float4(info.position, 1.0, 1.0, 1.0);
+	OutNormal[id.xy] = float4(info.normal, 1.0, 1.0, 1.0);
+}

@@ -185,7 +185,7 @@ Shader "Skinning Standard"
 
 				float4 skinnedVertex = mul(combinedMatrix, v.vertex);
 					
-				skinnedVertex *= objectPositionsBuffer[unity_InstanceID].w;
+				skinnedVertex *= objectPositionsBuffer[unity_InstanceID].y;
 				float4 posWorld = QuaternionMul(skinnedVertex, objectRotationsBuffer[unity_InstanceID]);
 				posWorld.xyz = posWorld + objectPositionsBuffer[unity_InstanceID].xyz;
 

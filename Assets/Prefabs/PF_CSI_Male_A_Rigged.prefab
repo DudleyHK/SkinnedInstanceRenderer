@@ -549,10 +549,10 @@ Animation:
   serializedVersion: 3
   m_Animation: {fileID: 7400000, guid: fd2f763859f43ac438724a0fd9675874, type: 3}
   m_Animations:
-  - {fileID: 7400000, guid: 2522ae44238c6d4408f3ed0c9796914b, type: 3}
+  - {fileID: 7400000, guid: fd2f763859f43ac438724a0fd9675874, type: 3}
   - {fileID: 7400000, guid: b2f4f96caa6c18b44a65dce2055b7412, type: 3}
   - {fileID: 7400000, guid: 0f1ca4ac6b976624f9aaef1eb51849e3, type: 3}
-  - {fileID: 7400000, guid: fd2f763859f43ac438724a0fd9675874, type: 3}
+  - {fileID: 7400000, guid: 2522ae44238c6d4408f3ed0c9796914b, type: 3}
   m_WrapMode: 0
   m_PlayAutomatically: 1
   m_AnimatePhysics: 0

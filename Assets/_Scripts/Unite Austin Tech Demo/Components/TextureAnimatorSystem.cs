@@ -75,7 +75,7 @@ public class TextureAnimatorSystem : JobComponentSystem
 
     #region Per unit type tuples
 
-   
+
 
     private ComponentGroup units;
     private ComponentGroup meleeUnits;
@@ -189,8 +189,8 @@ public class TextureAnimatorSystem : JobComponentSystem
 
                 var animatorData = textureAnimatorData[i];
 
-                AnimationClipDataBaked clip = animationClips[(int)animatorData.UnitType * 25 + animatorData.CurrentAnimationId];
-                Quaternion rotation = Quaternion.LookRotation(unitTransform.Forward, new Vector3(0.0f, 1.0f, 0.0f));
+                AnimationClipDataBaked clip = animationClips[animatorData.UnitType * 25 + animatorData.CurrentAnimationId];
+                Quaternion rotation = Quaternion.LookRotation(unitTransform.Forward, Vector3.up);
                 float texturePosition = textureAnimatorData[i].AnimationNormalizedTime * clip.TextureRange + clip.TextureOffset;
                 int lowerPixelInt = (int)math.floor(texturePosition * clip.TextureWidth);
                 //float lowerPixelCenter = (lowerPixelInt + 0.5f) / clip.TextureWidth;
@@ -203,7 +203,7 @@ public class TextureAnimatorSystem : JobComponentSystem
                 //float3 texturePositionData = new float3(texturePosition, 0, -1);
 
                 float4 position = new float4(unitTransform.Position, unitTransform.Scale);
-
+                
                 if(distance < DistanceMaxLod0)
                 {
                     Lod0Positions.Add(position);
@@ -258,7 +258,7 @@ public class TextureAnimatorSystem : JobComponentSystem
 
         perUnitTypeDataHolder = new Dictionary<UnitType, DataPerUnitType>();
         InstantiatePerUnitTypeData(UnitType.Melee);
-        InstantiatePerUnitTypeData(UnitType.Skeleton);
+        // InstantiatePerUnitTypeData(UnitType.Skeleton);
 
         initialized = true;
     }
@@ -390,7 +390,7 @@ public class TextureAnimatorSystem : JobComponentSystem
             ComponentDataArray<UnitTransformData> meleeTransformData = meleeUnits.GetComponentDataArray<UnitTransformData>();
 
             ComponentDataArray<TextureAnimatorData> skeletonTextureAnimationData = skeletonUnits.GetComponentDataArray<TextureAnimatorData>();
-            ComponentDataArray<UnitTransformData>   skeletonTransformData = skeletonUnits.GetComponentDataArray<UnitTransformData>();
+            ComponentDataArray<UnitTransformData> skeletonTransformData = skeletonUnits.GetComponentDataArray<UnitTransformData>();
 
             var prepareAnimatorJob = new PrepareAnimatorDataJob()
             {

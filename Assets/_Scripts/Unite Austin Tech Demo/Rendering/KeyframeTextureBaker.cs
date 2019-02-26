@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
 using UnityEngine;
 
 public static class KeyframeTextureBaker
@@ -30,12 +32,12 @@ public static class KeyframeTextureBaker
 		BakedData bakedData = new BakedData();
 
 		bakedData.NewMesh = CreateMesh(originalRenderer, lods.Scale);
-		var lod1Mesh = CreateMesh(originalRenderer, lods.Scale, lods.Lod1Mesh);
+        var lod1Mesh = CreateMesh(originalRenderer, lods.Scale, lods.Lod1Mesh);
 		var lod2Mesh = CreateMesh(originalRenderer, lods.Scale, lods.Lod2Mesh);
 		var lod3Mesh = CreateMesh(originalRenderer, lods.Scale, lods.Lod3Mesh);
 		bakedData.lods = new LodData(lod1Mesh, lod2Mesh, lod3Mesh, lods.Lod1Distance, lods.Lod2Distance, lods.Lod3Distance);
 
-		bakedData.Framerate = 60f;
+		bakedData.Framerate = 90f;
 
 		List<Matrix4x4[,]> sampledBoneMatrices = new List<Matrix4x4[,]>();
 
@@ -81,8 +83,6 @@ public static class KeyframeTextureBaker
 		{
 			for (int boneIndex = 0; boneIndex < sampledBoneMatrices[i].GetLength(1); boneIndex++)
 			{
-				//Color previousRotation = new Color();
-
 				for (int keyframeIndex = 0; keyframeIndex < sampledBoneMatrices[i].GetLength(0); keyframeIndex++)
 				{
 					//var rotation = GetRotation(Quaternion.LookRotation(sampledBoneMatrices[i][keyframeIndex, boneIndex].GetColumn(2),
@@ -135,7 +135,17 @@ public static class KeyframeTextureBaker
 		bakedData.Texture2.Apply(false, false);
 
 
-		runningTotalNumberOfKeyframes = 0;
+#if UNITY_EDITOR
+        AssetDatabase.CreateAsset(bakedData.Texture0, Path.Combine("Assets", "texture0" + ".asset"));
+        AssetDatabase.CreateAsset(bakedData.Texture1, Path.Combine("Assets", "texture1" + ".asset"));
+        AssetDatabase.CreateAsset(bakedData.Texture2, Path.Combine("Assets", "texture2" + ".asset"));
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+# endif
+
+
+        runningTotalNumberOfKeyframes = 0;
 		for (int i = 0; i < sampledBoneMatrices.Count; i++)
 		{
 			for (int boneIndex = 0; boneIndex < sampledBoneMatrices[i].GetLength(1); boneIndex++)
@@ -174,7 +184,7 @@ public static class KeyframeTextureBaker
 		return bakedData;
 	}
 
-	public static string Format(Vector4 v)
+    public static string Format(Vector4 v)
 	{
 		return "(" + v.x + ", " + v.y + ", " + v.z + ", " + v.w + ")";
 	}
@@ -188,7 +198,7 @@ public static class KeyframeTextureBaker
 	{
 		Mesh newMesh = new Mesh();
 		Mesh originalMesh = mesh == null ? originalRenderer.sharedMesh : mesh;
-		var boneWeights = originalMesh.boneWeights;
+		BoneWeight[] boneWeights = originalMesh.boneWeights;
 
 		originalMesh.CopyMeshData(newMesh);
 
@@ -267,7 +277,6 @@ public static class KeyframeTextureBaker
 			{
 				// Put it into model space for better compression.
 				boneMatrices[i, j] = renderer.localToWorldMatrix.inverse * renderer.bones[j].localToWorldMatrix * renderer.sharedMesh.bindposes[j];
-				//boneMatrices[i, j] = renderer.bones[j].localToWorldMatrix;
 			}
 		}
 
